@@ -8,16 +8,14 @@ import EthWallet from './ethWallet';
 window.Buffer = window.Buffer || Buffer;
 
 const Content = () => {
-  const [mnemonic, setMnemonic] = useState([]);
-  const [seed, setSeed] = useState("");
-    const [balances, setBalances] = useState({});
+  const [mnemonic, setMnemonic] = useState<string[]>([]);
+  const [seed, setSeed] = useState<Buffer>();
 
 
   const generatePhrase = () => {
     const mn = generateMnemonic(); 
-    console.log('Generated Mnemonic:', mn);
     const phraseArray = mn.split(" ");
-    const sd = mnemonicToSeedSync(mn); 
+    const sd: Buffer = mnemonicToSeedSync(mn) || ""; 
     setSeed(sd);
     setMnemonic(phraseArray);
   }
@@ -47,7 +45,7 @@ const Content = () => {
         )}
       </div>
       <div className='m-2'>
-    {mnemonic.length > 0 && (
+    {mnemonic.length > 0 && seed && (
     <div className='grid grid-flow-col grid-cols-2 w-full gap-10'>
       <SolanaWallet seed={seed} />
       <EthWallet seed={seed} />

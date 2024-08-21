@@ -5,10 +5,19 @@ import nacl from "tweetnacl";
 import { Button } from './ui/button';
 import axios from 'axios';
 
-const SolanaWallet = ({ seed }) => {
+interface BalanceState {
+  [index: number]: number;
+}
+
+interface SolanaWalletProps {
+  seed: Buffer;  
+}
+
+
+const SolanaWallet = ({ seed }:SolanaWalletProps) => {
   const [index, setIndex] = useState(0);
-  const [publicKeys, setPublicKeys] = useState([]);
-  const [balances, setBalances] = useState({});
+  const [publicKeys, setPublicKeys] = useState<string[]>([]);
+  const [balances, setBalances] = useState<BalanceState>({});
 
   const generateWallet = () => {
     const path = `m/44'/501'/${index}'/0'`;
@@ -16,10 +25,10 @@ const SolanaWallet = ({ seed }) => {
     const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
     const keypair = Keypair.fromSecretKey(secret);
     setIndex(index + 1);
-    setPublicKeys([...publicKeys, keypair.publicKey]);
+    setPublicKeys([...publicKeys, keypair.publicKey.toBase58()]); // Convert PublicKey to string
   };
 
-  const showBalance = async (key, idx) => {
+  const showBalance = async (key: string, idx: number) => {
     try {
       const response = await axios.post(
         "https://mainnet.helius-rpc.com/?api-key=bbba508a-8a83-457b-b652-6ccb8fe1775f",
@@ -27,7 +36,7 @@ const SolanaWallet = ({ seed }) => {
           jsonrpc: "2.0",
           id: 1,
           method: "getBalance",
-          params: [key.toBase58(), { commitment: "finalized" }],
+          params: [key, { commitment: "finalized" }],
         },
         {
           headers: {
@@ -45,7 +54,7 @@ const SolanaWallet = ({ seed }) => {
     }
   };
 
-  const removeWallet = (idxToRemove) => {
+  const removeWallet = (idxToRemove: number) => {
     setPublicKeys(publicKeys.filter((_, idx) => idx !== idxToRemove));
     setBalances((prevBalances) => {
       const newBalances = { ...prevBalances };
@@ -65,7 +74,7 @@ const SolanaWallet = ({ seed }) => {
           <div key={idx} className="border p-4 rounded-lg shadow-md items-center">
             <div className="text-lg font-semibold">Wallet {idx + 1}</div>
             <div className="ml-4 flex justify-between gap-2">
-              <p className="text-md">Public Key: {key.toBase58()}</p>
+              <p className="text-md">Public Key: {key}</p>
               <div
                 className="cursor-pointer"
                 onClick={() => removeWallet(idx)}

@@ -3,11 +3,19 @@ import { Wallet, HDNodeWallet } from "ethers";
 import { Button } from './ui/button';
 import { ethers } from 'ethers';
 
-const EthWallet = ({ seed }) => {
-  const [index, setIndex] = useState(0);
-  const [publicKeys, setPublicKeys] = useState([]);
-  const [balances, setBalances] = useState({});
+interface BalanceState {
+  [index: number]: number | string;
+}
 
+interface SolanaWalletProps {
+  seed: Buffer ;  
+}
+
+
+const EthWallet = ({ seed }:SolanaWalletProps) => {
+  const [index, setIndex] = useState(0);
+  const [publicKeys, setPublicKeys] = useState<string[]>([]);
+  const [balances, setBalances] = useState<BalanceState>({});
   const generateWallet = () => {
     try {
       const derivationPath = `m/44'/60'/${index}'/0/0`; 
@@ -22,11 +30,11 @@ const EthWallet = ({ seed }) => {
     }
   };
 
-  const removeWallet = (idxToRemove) => {
+  const removeWallet = (idxToRemove:number) => {
     setPublicKeys(publicKeys.filter((_, idx) => idx !== idxToRemove));
   };
 
-  const showBalance = async (key, idx) => {
+  const showBalance = async (key: ethers.AddressLike, idx: number) => {
     try {
       const provider = new ethers.JsonRpcProvider('https://mainnet.infura.io/v3/0e339e6732e14936a03e3b07e9fa216d');
       const balanceWei = await provider.getBalance(key);
