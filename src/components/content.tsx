@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Button } from './ui/button';
 import { generateMnemonic, mnemonicToSeedSync } from "bip39";
 import { Buffer } from 'buffer';
